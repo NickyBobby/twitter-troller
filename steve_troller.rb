@@ -12,6 +12,9 @@ retweet_count = 0
 reply_count   = 0
 tweet_count   = 0
 
+today = Date.today
+two_days_ago = Date.today.prev_day.prev_day
+
 options = {
   count: 200
 }
@@ -19,10 +22,10 @@ options = {
 tweets = client.user_timeline('stevekinney', options)
 
 tweets.each do |tweet|
-  if Date.today > Date.parse(tweet.created_at.to_s) && Date.today.prev_day.prev_day < Date.parse(tweet.created_at.to_s)
-    client.retweet(tweet) rescue
-    client.favorite(tweet) rescue
-    puts tweet.text
+  tweet_date = Date.parse(tweet.created_at.to_s)
+  if tweet_date < today && tweet_date > two_days_ago
+    client.favorite(tweet)
+    client.retweet(tweet) rescue 'already tweeted'
     if tweet.reply?
       reply_count += 1
     elsif tweet.retweet?
@@ -30,6 +33,7 @@ tweets.each do |tweet|
     else
       tweet_count += 1
     end
+    puts tweet.text
   end
 end
 
